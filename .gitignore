@@ -1,0 +1,10 @@
+node_modules/
+*.db
+*.log
+store/
+runs/
+cache/
+platform.json
+pages.json
+shots/
+.DS_Store

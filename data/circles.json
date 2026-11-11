@@ -1,0 +1,202 @@
+[
+ {
+  "name": "幽閉サテライト",
+  "n": 243,
+  "genre": "交响摇滚 / 动画主题曲",
+  "intro": "《幻想万华镜》主题曲起家，旋律华丽、vocal 阵容厚，是最“入坑友好”的一支。",
+  "art": "background: radial-gradient(120% 120% at 15% 10%, hsl(116 70% 42% / .95), transparent 55%), radial-gradient(120% 120% at 85% 90%, hsl(174 75% 38% / .9), transparent 60%), linear-gradient(140deg, hsl(116 35% 14%), hsl(174 40% 10%));",
+  "ch": "幽"
+ },
+ {
+  "name": "暁Records",
+  "n": 109,
+  "genre": "高速摇滚 / 金属",
+  "intro": "Stack 的爆发嗓配高速双踩，同人金属里最有辨识度的声音之一。",
+  "art": "background: radial-gradient(120% 120% at 15% 10%, hsl(293 70% 42% / .95), transparent 55%), radial-gradient(120% 120% at 85% 90%, hsl(351 75% 38% / .9), transparent 60%), linear-gradient(140deg, hsl(293 35% 14%), hsl(351 40% 10%));",
+  "ch": "暁"
+ },
+ {
+  "name": "EastNewSound",
+  "n": 104,
+  "genre": "Trance / 电子",
+  "intro": "东方电音老牌，nayuta 等 vocal 加持，旋律和氛围感都很稳。",
+  "art": "background: radial-gradient(120% 120% at 15% 10%, hsl(276 70% 42% / .95), transparent 55%), radial-gradient(120% 120% at 85% 90%, hsl(334 75% 38% / .9), transparent 60%), linear-gradient(140deg, hsl(276 35% 14%), hsl(334 40% 10%));",
+  "ch": "E"
+ },
+ {
+  "name": "豚乙女",
+  "n": 100,
+  "genre": "和风摇滚 / 朋克",
+  "intro": "ランコ 的嗓音又野又暖，编曲接地气，听着像在居酒屋隔壁排练。",
+  "art": "background: radial-gradient(120% 120% at 15% 10%, hsl(96 70% 42% / .95), transparent 55%), radial-gradient(120% 120% at 85% 90%, hsl(154 75% 38% / .9), transparent 60%), linear-gradient(140deg, hsl(96 35% 14%), hsl(154 40% 10%));",
+  "ch": "豚"
+ },
+ {
+  "name": "少女フラクタル",
+  "n": 99,
+  "genre": "流行摇滚",
+  "intro": "幽闭系分支，副歌抓耳，适合想听“燃但不重”的时候。",
+  "art": "background: radial-gradient(120% 120% at 15% 10%, hsl(305 70% 42% / .95), transparent 55%), radial-gradient(120% 120% at 85% 90%, hsl(3 75% 38% / .9), transparent 60%), linear-gradient(140deg, hsl(305 35% 14%), hsl(3 40% 10%));",
+  "ch": "少"
+ },
+ {
+  "name": "SOUND HOLIC",
+  "n": 121,
+  "genre": "摇滚 / 金属 / Eurobeat",
+  "intro": "二十年老铺，vocal 阵容豪华，风格跨度大到像开盲盒。",
+  "art": "background: radial-gradient(120% 120% at 15% 10%, hsl(122 70% 42% / .95), transparent 55%), radial-gradient(120% 120% at 85% 90%, hsl(180 75% 38% / .9), transparent 60%), linear-gradient(140deg, hsl(122 35% 14%), hsl(180 40% 10%));",
+  "ch": "S"
+ },
+ {
+  "name": "Amateras Records",
+  "n": 128,
+  "genre": "Trance / House",
+  "intro": "DJ 向编曲，循环感强，写代码时的背景音首选。",
+  "art": "background: radial-gradient(120% 120% at 15% 10%, hsl(208 70% 42% / .95), transparent 55%), radial-gradient(120% 120% at 85% 90%, hsl(266 75% 38% / .9), transparent 60%), linear-gradient(140deg, hsl(208 35% 14%), hsl(266 40% 10%));",
+  "ch": "A"
+ },
+ {
+  "name": "DiGiTAL WiNG",
+  "n": 152,
+  "genre": "Eurobeat / Hi-NRG",
+  "intro": "高速舞曲专门店，BPM 拉满，适合需要肾上腺素的时候。",
+  "art": "background: radial-gradient(120% 120% at 15% 10%, hsl(187 70% 42% / .95), transparent 55%), radial-gradient(120% 120% at 85% 90%, hsl(245 75% 38% / .9), transparent 60%), linear-gradient(140deg, hsl(187 35% 14%), hsl(245 40% 10%));",
+  "ch": "D"
+ },
+ {
+  "name": "TAMUSIC",
+  "n": 197,
+  "genre": "弦乐 / 钢琴 / 古典",
+  "intro": "产量惊人，从钢琴小品到弦乐四重奏都有，安静派。",
+  "art": "background: radial-gradient(120% 120% at 15% 10%, hsl(244 70% 42% / .95), transparent 55%), radial-gradient(120% 120% at 85% 90%, hsl(302 75% 38% / .9), transparent 60%), linear-gradient(140deg, hsl(244 35% 14%), hsl(302 40% 10%));",
+  "ch": "T"
+ },
+ {
+  "name": "交響アクティブNEETs",
+  "n": 22,
+  "genre": "交响乐",
+  "intro": "东方 Philharmonic 系列，正儿八经的管弦乐编制。",
+  "art": "background: radial-gradient(120% 120% at 15% 10%, hsl(280 70% 42% / .95), transparent 55%), radial-gradient(120% 120% at 85% 90%, hsl(338 75% 38% / .9), transparent 60%), linear-gradient(140deg, hsl(280 35% 14%), hsl(338 40% 10%));",
+  "ch": "交"
+ },
+ {
+  "name": "東京アクティブNEETs",
+  "n": 38,
+  "genre": "Jazz / Funk / Rock",
+  "intro": "爵士与摇滚的混血，现场感很强。",
+  "art": "background: radial-gradient(120% 120% at 15% 10%, hsl(228 70% 42% / .95), transparent 55%), radial-gradient(120% 120% at 85% 90%, hsl(286 75% 38% / .9), transparent 60%), linear-gradient(140deg, hsl(228 35% 14%), hsl(286 40% 10%));",
+  "ch": "東"
+ },
+ {
+  "name": "岸田教団&THE明星ロケッツ",
+  "n": 22,
+  "genre": "日式摇滚",
+  "intro": "ichigo 的声线加王道摇滚编曲，燃向。",
+  "art": "background: radial-gradient(120% 120% at 15% 10%, hsl(103 70% 42% / .95), transparent 55%), radial-gradient(120% 120% at 85% 90%, hsl(161 75% 38% / .9), transparent 60%), linear-gradient(140deg, hsl(103 35% 14%), hsl(161 40% 10%));",
+  "ch": "岸"
+ },
+ {
+  "name": "凋叶棕",
+  "n": 54,
+  "genre": "叙事 / 和风",
+  "intro": "めらみぽっぷ 的 vocal 加文学性叙事，每张专辑像一本短篇集。",
+  "art": "background: radial-gradient(120% 120% at 15% 10%, hsl(170 70% 42% / .95), transparent 55%), radial-gradient(120% 120% at 85% 90%, hsl(228 75% 38% / .9), transparent 60%), linear-gradient(140deg, hsl(170 35% 14%), hsl(228 40% 10%));",
+  "ch": "凋"
+ },
+ {
+  "name": "彩音 ～xi-on～",
+  "n": 47,
+  "genre": "钢琴 / 摇滚器乐",
+  "intro": "旋律派器乐，钢琴与吉他交替，耐听。",
+  "art": "background: radial-gradient(120% 120% at 15% 10%, hsl(315 70% 42% / .95), transparent 55%), radial-gradient(120% 120% at 85% 90%, hsl(13 75% 38% / .9), transparent 60%), linear-gradient(140deg, hsl(315 35% 14%), hsl(13 40% 10%));",
+  "ch": "彩"
+ },
+ {
+  "name": "狐の工作室",
+  "n": 30,
+  "genre": "咖啡 / 爵士 / 室内乐",
+  "intro": "治愈系，适合下午晒太阳的时候放。",
+  "art": "background: radial-gradient(120% 120% at 15% 10%, hsl(183 70% 42% / .95), transparent 55%), radial-gradient(120% 120% at 85% 90%, hsl(241 75% 38% / .9), transparent 60%), linear-gradient(140deg, hsl(183 35% 14%), hsl(241 40% 10%));",
+  "ch": "狐"
+ },
+ {
+  "name": "Melodic Taste",
+  "n": 28,
+  "genre": "交响 / 吹奏乐",
+  "intro": "偏古典编曲，管乐音色很漂亮。",
+  "art": "background: radial-gradient(120% 120% at 15% 10%, hsl(266 70% 42% / .95), transparent 55%), radial-gradient(120% 120% at 85% 90%, hsl(324 75% 38% / .9), transparent 60%), linear-gradient(140deg, hsl(266 35% 14%), hsl(324 40% 10%));",
+  "ch": "M"
+ },
+ {
+  "name": "魂音泉",
+  "n": 92,
+  "genre": "Hip-hop / R&B",
+  "intro": "东方说唱代表，rappers 轮番上阵，律动感强。",
+  "art": "background: radial-gradient(120% 120% at 15% 10%, hsl(4 70% 42% / .95), transparent 55%), radial-gradient(120% 120% at 85% 90%, hsl(62 75% 38% / .9), transparent 60%), linear-gradient(140deg, hsl(4 35% 14%), hsl(62 40% 10%));",
+  "ch": "魂"
+ },
+ {
+  "name": "COOL&CREATE",
+  "n": 53,
+  "genre": "电波 / 搞笑 / 高速",
+  "intro": "beatMARIO 的整活王国，欢乐向。",
+  "art": "background: radial-gradient(120% 120% at 15% 10%, hsl(85 70% 42% / .95), transparent 55%), radial-gradient(120% 120% at 85% 90%, hsl(143 75% 38% / .9), transparent 60%), linear-gradient(140deg, hsl(85 35% 14%), hsl(143 40% 10%));",
+  "ch": "C"
+ },
+ {
+  "name": "石鹸屋",
+  "n": 22,
+  "genre": "朋克摇滚",
+  "intro": "热血直球，吉他失真拉满。",
+  "art": "background: radial-gradient(120% 120% at 15% 10%, hsl(182 70% 42% / .95), transparent 55%), radial-gradient(120% 120% at 85% 90%, hsl(240 75% 38% / .9), transparent 60%), linear-gradient(140deg, hsl(182 35% 14%), hsl(240 40% 10%));",
+  "ch": "石"
+ },
+ {
+  "name": "Demetori",
+  "n": 17,
+  "genre": "重型金属 / 器乐",
+  "intro": "吉他 instrumental 金属，技术流。",
+  "art": "background: radial-gradient(120% 120% at 15% 10%, hsl(95 70% 42% / .95), transparent 55%), radial-gradient(120% 120% at 85% 90%, hsl(153 75% 38% / .9), transparent 60%), linear-gradient(140deg, hsl(95 35% 14%), hsl(153 40% 10%));",
+  "ch": "D"
+ },
+ {
+  "name": "UNDEAD CORPORATION",
+  "n": 25,
+  "genre": "极端金属 / 和风",
+  "intro": "重、快、黑，偶尔掺和风旋律，反差感强。",
+  "art": "background: radial-gradient(120% 120% at 15% 10%, hsl(293 70% 42% / .95), transparent 55%), radial-gradient(120% 120% at 85% 90%, hsl(351 75% 38% / .9), transparent 60%), linear-gradient(140deg, hsl(293 35% 14%), hsl(351 40% 10%));",
+  "ch": "U"
+ },
+ {
+  "name": "GET IN THE RING",
+  "n": 47,
+  "genre": "摇滚 / 流行",
+  "intro": "vocal 向，旋律顺耳，适合入门。",
+  "art": "background: radial-gradient(120% 120% at 15% 10%, hsl(160 70% 42% / .95), transparent 55%), radial-gradient(120% 120% at 85% 90%, hsl(218 75% 38% / .9), transparent 60%), linear-gradient(140deg, hsl(160 35% 14%), hsl(218 40% 10%));",
+  "ch": "G"
+ },
+ {
+  "name": "Alstroemeria Records",
+  "n": 108,
+  "genre": "House / Electro",
+  "intro": "同人电音元老，品味稳定，跳舞向。",
+  "art": "background: radial-gradient(120% 120% at 15% 10%, hsl(180 70% 42% / .95), transparent 55%), radial-gradient(120% 120% at 85% 90%, hsl(238 75% 38% / .9), transparent 60%), linear-gradient(140deg, hsl(180 35% 14%), hsl(238 40% 10%));",
+  "ch": "A"
+ },
+ {
+  "name": "森羅万象",
+  "n": 88,
+  "genre": "和风 / 摇滚",
+  "intro": "ishidakk 主脑，旋律与和风气质兼具。",
+  "art": "background: radial-gradient(120% 120% at 15% 10%, hsl(109 70% 42% / .95), transparent 55%), radial-gradient(120% 120% at 85% 90%, hsl(167 75% 38% / .9), transparent 60%), linear-gradient(140deg, hsl(109 35% 14%), hsl(167 40% 10%));",
+  "ch": "森"
+ },
+ {
+  "name": "5150",
+  "n": 28,
+  "genre": "交响金属 / 游戏音乐",
+  "intro": "游戏配乐式编曲，史诗感。",
+  "art": "background: radial-gradient(120% 120% at 15% 10%, hsl(63 70% 42% / .95), transparent 55%), radial-gradient(120% 120% at 85% 90%, hsl(121 75% 38% / .9), transparent 60%), linear-gradient(140deg, hsl(63 35% 14%), hsl(121 40% 10%));",
+  "ch": "5"
+ }
+]

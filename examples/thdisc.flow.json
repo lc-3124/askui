@@ -1,0 +1,287 @@
+{
+ "name": "thdisc-pick",
+ "goal": "让用户认领东方社团，为未选项生成简介与 rsync 指令",
+ "tags": [
+  "touhou",
+  "music",
+  "download"
+ ],
+ "contextRefs": [
+  "data/circles.json"
+ ],
+ "steps": [
+  {
+   "key": "select",
+   "goal": "收集用户认识的社团",
+   "kind": "input",
+   "ui": {
+    "kicker": "THDISC · CIRCLE PICKER",
+    "title": "你认识哪些东方同人社团？",
+    "subtitle": "从 down.thdisc.com 的 2726 个社团里选了 25 个有代表性的。勾出你听过的——提交后由 AI 接手，把剩下的整理成推荐清单和可同步指令。",
+    "meta": [
+     "数据源 down.thdisc.com",
+     "索引 937 KB",
+     "候选 25 个社团"
+    ],
+    "blocks": [
+     {
+      "type": "cards",
+      "name": "known",
+      "multiple": true,
+      "options": [
+       {
+        "value": "幽閉サテライト",
+        "label": "幽閉サテライト",
+        "desc": "《幻想万华镜》主题曲起家，旋律华丽、vocal 阵容厚，是最“入坑友好”的一支。",
+        "tag": "交响摇滚 / 动画主题曲",
+        "meta": "243 张"
+       },
+       {
+        "value": "暁Records",
+        "label": "暁Records",
+        "desc": "Stack 的爆发嗓配高速双踩，同人金属里最有辨识度的声音之一。",
+        "tag": "高速摇滚 / 金属",
+        "meta": "109 张"
+       },
+       {
+        "value": "EastNewSound",
+        "label": "EastNewSound",
+        "desc": "东方电音老牌，nayuta 等 vocal 加持，旋律和氛围感都很稳。",
+        "tag": "Trance / 电子",
+        "meta": "104 张"
+       },
+       {
+        "value": "豚乙女",
+        "label": "豚乙女",
+        "desc": "ランコ 的嗓音又野又暖，编曲接地气，听着像在居酒屋隔壁排练。",
+        "tag": "和风摇滚 / 朋克",
+        "meta": "100 张"
+       },
+       {
+        "value": "少女フラクタル",
+        "label": "少女フラクタル",
+        "desc": "幽闭系分支，副歌抓耳，适合想听“燃但不重”的时候。",
+        "tag": "流行摇滚",
+        "meta": "99 张"
+       },
+       {
+        "value": "SOUND HOLIC",
+        "label": "SOUND HOLIC",
+        "desc": "二十年老铺，vocal 阵容豪华，风格跨度大到像开盲盒。",
+        "tag": "摇滚 / 金属 / Eurobeat",
+        "meta": "121 张"
+       },
+       {
+        "value": "Amateras Records",
+        "label": "Amateras Records",
+        "desc": "DJ 向编曲，循环感强，写代码时的背景音首选。",
+        "tag": "Trance / House",
+        "meta": "128 张"
+       },
+       {
+        "value": "DiGiTAL WiNG",
+        "label": "DiGiTAL WiNG",
+        "desc": "高速舞曲专门店，BPM 拉满，适合需要肾上腺素的时候。",
+        "tag": "Eurobeat / Hi-NRG",
+        "meta": "152 张"
+       },
+       {
+        "value": "TAMUSIC",
+        "label": "TAMUSIC",
+        "desc": "产量惊人，从钢琴小品到弦乐四重奏都有，安静派。",
+        "tag": "弦乐 / 钢琴 / 古典",
+        "meta": "197 张"
+       },
+       {
+        "value": "交響アクティブNEETs",
+        "label": "交響アクティブNEETs",
+        "desc": "东方 Philharmonic 系列，正儿八经的管弦乐编制。",
+        "tag": "交响乐",
+        "meta": "22 张"
+       },
+       {
+        "value": "東京アクティブNEETs",
+        "label": "東京アクティブNEETs",
+        "desc": "爵士与摇滚的混血，现场感很强。",
+        "tag": "Jazz / Funk / Rock",
+        "meta": "38 张"
+       },
+       {
+        "value": "岸田教団&THE明星ロケッツ",
+        "label": "岸田教団&THE明星ロケッツ",
+        "desc": "ichigo 的声线加王道摇滚编曲，燃向。",
+        "tag": "日式摇滚",
+        "meta": "22 张"
+       },
+       {
+        "value": "凋叶棕",
+        "label": "凋叶棕",
+        "desc": "めらみぽっぷ 的 vocal 加文学性叙事，每张专辑像一本短篇集。",
+        "tag": "叙事 / 和风",
+        "meta": "54 张"
+       },
+       {
+        "value": "彩音 ～xi-on～",
+        "label": "彩音 ～xi-on～",
+        "desc": "旋律派器乐，钢琴与吉他交替，耐听。",
+        "tag": "钢琴 / 摇滚器乐",
+        "meta": "47 张"
+       },
+       {
+        "value": "狐の工作室",
+        "label": "狐の工作室",
+        "desc": "治愈系，适合下午晒太阳的时候放。",
+        "tag": "咖啡 / 爵士 / 室内乐",
+        "meta": "30 张"
+       },
+       {
+        "value": "Melodic Taste",
+        "label": "Melodic Taste",
+        "desc": "偏古典编曲，管乐音色很漂亮。",
+        "tag": "交响 / 吹奏乐",
+        "meta": "28 张"
+       },
+       {
+        "value": "魂音泉",
+        "label": "魂音泉",
+        "desc": "东方说唱代表，rappers 轮番上阵，律动感强。",
+        "tag": "Hip-hop / R&B",
+        "meta": "92 张"
+       },
+       {
+        "value": "COOL&CREATE",
+        "label": "COOL&CREATE",
+        "desc": "beatMARIO 的整活王国，欢乐向。",
+        "tag": "电波 / 搞笑 / 高速",
+        "meta": "53 张"
+       },
+       {
+        "value": "石鹸屋",
+        "label": "石鹸屋",
+        "desc": "热血直球，吉他失真拉满。",
+        "tag": "朋克摇滚",
+        "meta": "22 张"
+       },
+       {
+        "value": "Demetori",
+        "label": "Demetori",
+        "desc": "吉他 instrumental 金属，技术流。",
+        "tag": "重型金属 / 器乐",
+        "meta": "17 张"
+       },
+       {
+        "value": "UNDEAD CORPORATION",
+        "label": "UNDEAD CORPORATION",
+        "desc": "重、快、黑，偶尔掺和风旋律，反差感强。",
+        "tag": "极端金属 / 和风",
+        "meta": "25 张"
+       },
+       {
+        "value": "GET IN THE RING",
+        "label": "GET IN THE RING",
+        "desc": "vocal 向，旋律顺耳，适合入门。",
+        "tag": "摇滚 / 流行",
+        "meta": "47 张"
+       },
+       {
+        "value": "Alstroemeria Records",
+        "label": "Alstroemeria Records",
+        "desc": "同人电音元老，品味稳定，跳舞向。",
+        "tag": "House / Electro",
+        "meta": "108 张"
+       },
+       {
+        "value": "森羅万象",
+        "label": "森羅万象",
+        "desc": "ishidakk 主脑，旋律与和风气质兼具。",
+        "tag": "和风 / 摇滚",
+        "meta": "88 张"
+       },
+       {
+        "value": "5150",
+        "label": "5150",
+        "desc": "游戏配乐式编曲，史诗感。",
+        "tag": "交响金属 / 游戏音乐",
+        "meta": "28 张"
+       }
+      ]
+     }
+    ],
+    "submit": {
+     "label": "提交给 AI",
+     "note": "提交后由模型接手处理，页面会自动更新。"
+    },
+    "theme": {
+     "accent": "#5b5bd6"
+    }
+   },
+   "output": {
+    "type": "object",
+    "required": [
+     "known"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "known": {
+      "type": "array",
+      "maxItems": 25,
+      "items": {
+       "type": "string",
+       "enum": [
+        "幽閉サテライト",
+        "暁Records",
+        "EastNewSound",
+        "豚乙女",
+        "少女フラクタル",
+        "SOUND HOLIC",
+        "Amateras Records",
+        "DiGiTAL WiNG",
+        "TAMUSIC",
+        "交響アクティブNEETs",
+        "東京アクティブNEETs",
+        "岸田教団&THE明星ロケッツ",
+        "凋叶棕",
+        "彩音 ～xi-on～",
+        "狐の工作室",
+        "Melodic Taste",
+        "魂音泉",
+        "COOL&CREATE",
+        "石鹸屋",
+        "Demetori",
+        "UNDEAD CORPORATION",
+        "GET IN THE RING",
+        "Alstroemeria Records",
+        "森羅万象",
+        "5150"
+       ]
+      }
+     }
+    }
+   },
+   "next": "recommend"
+  },
+  {
+   "key": "recommend",
+   "goal": "排除已选项，为剩余社团生成简介与同步指令",
+   "kind": "compute",
+   "needs": [
+    "select.known"
+   ],
+   "tools": [
+    "make_result"
+   ],
+   "output": {
+    "type": "object",
+    "properties": {
+     "recommendations": {
+      "type": "array"
+     },
+     "script": {
+      "type": "string"
+     }
+    }
+   },
+   "next": null
+  }
+ ]
+}

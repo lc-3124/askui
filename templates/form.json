@@ -1,0 +1,30 @@
+{
+  "kicker": "QUICK FORM",
+  "title": "填几个参数",
+  "subtitle": "带 * 的是必填。",
+  "blocks": [
+    {
+      "type": "fields",
+      "fields": [
+        { "type": "text", "name": "name", "label": "名称", "required": true, "placeholder": "给这个任务起个名字" },
+        { "type": "number", "name": "budget", "label": "预算（元）", "required": true },
+        { "type": "select", "name": "mode", "label": "模式", "options": [{ "value": "fast", "label": "快" }, { "value": "safe", "label": "稳" }] },
+        { "type": "textarea", "name": "note", "label": "补充说明" }
+      ]
+    },
+    { "type": "confirm", "name": "agree", "label": "我确认以上信息无误" }
+  ],
+  "answerSchema": {
+    "type": "object",
+    "required": ["name", "budget", "agree"],
+    "additionalProperties": false,
+    "properties": {
+      "name": { "type": "string", "minLength": 1 },
+      "budget": { "type": "number", "minimum": 0 },
+      "mode": { "type": "string", "enum": ["fast", "safe"] },
+      "note": { "type": "string" },
+      "agree": { "type": "boolean" }
+    }
+  },
+  "submit": { "label": "提交" }
+}

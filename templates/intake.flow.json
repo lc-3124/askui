@@ -1,0 +1,128 @@
+{
+ "name": "immersive-intake",
+ "goal": "在不知道用户目标时，用网页收集目标、限制与推进方式",
+ "tags": [
+  "intake",
+  "starter",
+  "immersive"
+ ],
+ "steps": [
+  {
+   "key": "intake",
+   "goal": "收集目标与模式",
+   "kind": "input",
+   "ui": {
+    "kicker": "IMMERSIVE MODE",
+    "title": "你想做什么？",
+    "subtitle": "不用想得很清楚。用几句话描述目标，我会在网页上继续问，直到能开始。",
+    "meta": [
+     "此后都在网页里交互",
+     "不会在聊天里连环提问"
+    ],
+    "blocks": [
+     {
+      "type": "fields",
+      "fields": [
+       {
+        "type": "textarea",
+        "name": "goal",
+        "label": "你的目标",
+        "required": true,
+        "placeholder": "例如：帮我规划一次三天的东京旅行，预算 5000"
+       },
+       {
+        "type": "text",
+        "name": "constraints",
+        "label": "限制 / 偏好（可选）",
+        "placeholder": "时间、预算、不想要的东西……"
+       }
+      ]
+     },
+     {
+      "type": "cards",
+      "name": "mode",
+      "multiple": false,
+      "options": [
+       {
+        "value": "plan",
+        "label": "先做计划",
+        "desc": "拆成步骤，逐步确认",
+        "tag": "plan"
+       },
+       {
+        "value": "build",
+        "label": "直接开做",
+        "desc": "边做边问，少打扰",
+        "tag": "build"
+       },
+       {
+        "value": "explore",
+        "label": "先看看选项",
+        "desc": "给我几个方向再选",
+        "tag": "explore"
+       }
+      ]
+     }
+    ],
+    "answerSchema": {
+     "type": "object",
+     "required": [
+      "goal",
+      "mode"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "goal": {
+       "type": "string",
+       "minLength": 1,
+       "maxLength": 2000
+      },
+      "constraints": {
+       "type": "string",
+       "maxLength": 1000
+      },
+      "mode": {
+       "type": "string",
+       "enum": [
+        "plan",
+        "build",
+        "explore"
+       ]
+      }
+     }
+    },
+    "submit": {
+     "label": "开始"
+    }
+   },
+   "output": {
+    "type": "object",
+    "required": [
+     "goal",
+     "mode"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "goal": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+     },
+     "constraints": {
+      "type": "string",
+      "maxLength": 1000
+     },
+     "mode": {
+      "type": "string",
+      "enum": [
+       "plan",
+       "build",
+       "explore"
+      ]
+     }
+    }
+   },
+   "next": null
+  }
+ ]
+}

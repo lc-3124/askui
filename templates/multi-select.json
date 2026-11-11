@@ -1,0 +1,23 @@
+{
+  "kicker": "PICK ONE OR MORE",
+  "title": "需要你选一下",
+  "subtitle": "选完提交，我会接着处理。",
+  "blocks": [
+    {
+      "type": "cards",
+      "name": "selected",
+      "multiple": true,
+      "options": [
+        { "value": "a", "label": "选项 A", "desc": "一句话说明", "tag": "标签", "meta": "12 项" },
+        { "value": "b", "label": "选项 B", "desc": "一句话说明", "tag": "标签", "meta": "8 项" }
+      ]
+    }
+  ],
+  "answerSchema": {
+    "type": "object",
+    "required": ["selected"],
+    "additionalProperties": false,
+    "properties": { "selected": { "type": "array", "items": { "type": "string" }, "maxItems": 50 } }
+  },
+  "submit": { "label": "提交给 AI" }
+}

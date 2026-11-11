@@ -1,0 +1,289 @@
+#!/usr/bin/env node
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { spawn } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import { saveFlow, listFlows, getFlow, searchFlows, startRun, recordAnswer, advanceRun, getRun, putArtifact, searchArtifacts } from '../engine/flow.mjs';
+import { saveToCache, listCache, searchCache, showCache, bumpCache } from '../engine/cache.mjs';
+import { listModules, getModule, addModule, useModule, seedModules } from '../engine/modules.mjs';
+import { notify, detectChannels } from '../engine/notify.mjs';
+import { openPage, closeAll, closeByUrl, closeSensitive, listTabs } from '../engine/browser.mjs';
+import { init } from '../engine/init.mjs';
+import { readPlatform } from '../engine/platform.mjs';
+
+const HERE = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = path.resolve(HERE, '..');
+const HOME = os.homedir();
+const DATA = path.join(HOME, '.local/share/askui');
+const STORE = path.join(DATA, 'store');
+const PORT = Number(process.env.ASKUI_PORT || 9410);
+const BASE = `http://127.0.0.1:${PORT}`;
+
+const argv = process.argv.slice(2);
+const cmd = argv.shift();
+const flags = {};
+const pos = [];
+for (const a of argv) {
+  if (a.startsWith('--')) { const [k, v] = a.slice(2).split('='); flags[k] = v === undefined ? true : v; }
+  else pos.push(a);
+}
+const out = (o) => process.stdout.write(JSON.stringify(o, null, 2) + '\n');
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+async function health() {
+  try { return (await fetch(`${BASE}/health`, { signal: AbortSignal.timeout(600) })).ok; } catch { return false; }
+}
+async function serve() {
+  if (await health()) return true;
+  fs.mkdirSync(DATA, { recursive: true });
+  const log = fs.openSync(path.join(DATA, 'askd.log'), 'a');
+  const child = spawn(process.execPath, [path.join(ROOT, 'engine/askd.mjs')], {
+    detached: true, stdio: ['ignore', log, log], env: process.env,
+  });
+  child.unref();
+  for (let i = 0; i < 30; i++) { await sleep(120); if (await health()) return true; }
+  return false;
+}
+function session(id) {
+  const p = path.join(STORE, `${id}.json`);
+  if (!fs.existsSync(p)) throw new Error(`no such session: ${id}`);
+  return JSON.parse(fs.readFileSync(p, 'utf8'));
+}
+async function api(method, p, body, key) {
+  const r = await fetch(`${BASE}${p}`, {
+    method,
+    headers: { 'content-type': 'application/json', ...(key ? { 'x-askui-key': key } : {}) },
+    body: body ? JSON.stringify(body) : undefined,
+    signal: AbortSignal.timeout(Number(flags.timeout || 600000) + 5000),
+  });
+  const text = await r.text();
+  let parsed = {};
+  try { parsed = text ? JSON.parse(text) : {}; } catch { parsed = { ok: false, error: text.slice(0, 200) }; }
+  return { status: r.status, body: parsed };
+}
+
+const usage = `askui v0.1 — interaction engine for AI-generated UI
+
+  askui serve | stop | status
+  askui new <spec.json|page.html> [--html] [--brief=...] [--context=a,b] [--tools=x,y]
+  askui wait <id> [--timeout=600000]
+  askui push <id> <spec.json|page.html> [--html] [--final=false] [--if-version=N]
+  askui progress <id> --step=... [--detail=...] [--pct=...] [--tone=dim|ok|warn]
+  askui state <id> | events <id> | list
+  askui cancel <id> | rm <id>
+
+Spec: { title, subtitle, blocks: [...], answerSchema, submit, theme }
+Blocks: text | notice | cards | fields | confirm | list | code
+
+  askui cache save <flow> [--tags=a,b]
+  askui cache list | search <q> | show <name> | use <name>
+  askui mod list [--tag=] | get <short> | add <file> | use <short> | seed
+  askui note <session> <text>          # 过程中随手播报
+  askui report <session> --action=... [--detail=...] [--phase=before|after] [--status=ok|error]
+  askui think <session> <text> [--kind=]
+  askui notify --title= --body= [--level=] | --detect
+  askui page open <url> | close | list
+  askui cleanup --url= | --sensitive=a,b
+  askui runner start <flow> [--worker=cmd] | status <run> | stop <run>`;
+
+if (!cmd || cmd === 'help') { out({ ok: true, usage }); process.exit(0); }
+
+if (cmd === 'init') {
+  out(init({ force: !!flags.force }));
+  process.exit(0);
+}
+
+if (cmd === 'platform') {
+  out({ ok: true, platform: readPlatform() });
+  process.exit(0);
+}
+
+if (cmd === 'page') {
+  const sub = pos.shift();
+  if (sub === 'open') out(openPage(pos[0]));
+  else if (sub === 'close') out(closeAll());
+  else if (sub === 'list') out({ ok: true, tabs: listTabs() });
+  else out({ ok: false, error: `unknown page subcommand: ${sub}`, usage });
+  process.exit(0);
+}
+
+if (cmd === 'mod') {
+  const sub = pos.shift();
+  if (sub === 'list') out({ ok: true, modules: listModules({ tag: flags.tag }) });
+  else if (sub === 'get') { const m = getModule(pos[0]); out(m ? { ok: true, module: m } : { ok: false, error: 'module not found' }); }
+  else if (sub === 'add') out({ ok: true, module: addModule(JSON.parse(fs.readFileSync(pos[0], 'utf8'))) });
+  else if (sub === 'use') out({ ok: true, module: useModule(pos[0]) });
+  else if (sub === 'seed') out({ ok: true, modules: seedModules() });
+  else out({ ok: false, error: `unknown mod subcommand: ${sub}`, usage });
+  process.exit(0);
+}
+
+if (cmd === 'note') {
+  const id = pos[0];
+  const s = session(id);
+  out((await api('POST', `/api/report/${id}`, { action: pos.slice(1).join(' '), phase: 'note' }, s.adminKey)).body);
+  process.exit(0);
+}
+
+if (cmd === 'report') {
+  const id = pos[0];
+  const s = session(id);
+  const body = {
+    action: flags.action || pos.slice(1).join(' '),
+    detail: flags.detail || '',
+    phase: flags.phase || 'before',
+    status: flags.status || 'ok',
+  };
+  out((await api('POST', `/api/report/${id}`, body, s.adminKey)).body);
+  process.exit(0);
+}
+
+if (cmd === 'think') {
+  const id = pos[0];
+  const s = session(id);
+  out((await api('POST', `/api/thought/${id}`, { text: pos.slice(1).join(' '), kind: flags.kind || 'thought' }, s.adminKey)).body);
+  process.exit(0);
+}
+
+if (cmd === 'notify') {
+  if (flags.detect) out({ ok: true, ...detectChannels() });
+  else out(await notify({ title: flags.title || 'askui', body: flags.body || '', level: flags.level || 'info' }));
+  process.exit(0);
+}
+
+if (cmd === 'cleanup') {
+  if (flags.url) out({ ok: true, ...closeByUrl(String(flags.url), { keep: flags.keep ? String(flags.keep).split(',') : [] }) });
+  else if (flags.sensitive) out({ ok: true, ...closeSensitive(String(flags.sensitive).split(',')) });
+  else out({ ok: true, tabs: listTabs() });
+  process.exit(0);
+}
+
+if (cmd === 'runner') {
+  const sub = pos.shift();
+  if (sub === 'start') {
+    const started = await startRun(pos[0], { note: flags.context || '' });
+    const rid = started.run.id;
+    fs.mkdirSync(path.join(HOME, '.local/share/askui/runs'), { recursive: true });
+    const log = fs.openSync(path.join(HOME, '.local/share/askui/runs', rid + '.log'), 'a');
+    const child = spawn(process.execPath, [path.join(ROOT, 'engine/runner.mjs'), `--run=${rid}`, ...(flags.worker ? [`--worker=${flags.worker}`] : [])], {
+      detached: true, stdio: ['ignore', log, log], env: process.env,
+    });
+    child.unref();
+    out({ ok: true, run: started.run, session: started.session, runnerPid: child.pid });
+  } else if (sub === 'status') {
+    const r = getRun(pos[0]);
+    let pid = null;
+    try { pid = Number(fs.readFileSync(path.join(HOME, '.local/share/askui/runs', pos[0] + '.pid'), 'utf8')); } catch {}
+    const logPath = path.join(HOME, '.local/share/askui/runs', pos[0] + '.log');
+    const tail = fs.existsSync(logPath) ? fs.readFileSync(logPath, 'utf8').split(String.fromCharCode(10)).slice(-15).join(String.fromCharCode(10)) : '';
+    out({ ok: !!r, run: r, pid, log: tail });
+  } else if (sub === 'stop') {
+    let pid = null;
+    try { pid = Number(fs.readFileSync(path.join(HOME, '.local/share/askui/runs', pos[0] + '.pid'), 'utf8')); } catch {}
+    if (pid) { try { process.kill(pid, 'SIGTERM'); } catch {} }
+    out({ ok: true, stopped: pid });
+  } else out({ ok: false, error: `unknown runner subcommand: ${sub}`, usage });
+  process.exit(0);
+}
+
+if (cmd === 'cache') {
+  const sub = pos.shift();
+  if (sub === 'save') out(saveToCache(pos[0], { tags: flags.tags ? String(flags.tags).split(',') : [] }));
+  else if (sub === 'list') out({ ok: true, apps: listCache() });
+  else if (sub === 'search') out({ ok: true, apps: searchCache(pos.join(' ')) });
+  else if (sub === 'show') { const c = showCache(pos[0]); out(c ? { ok: true, ...c } : { ok: false, error: 'not found' }); }
+  else if (sub === 'use') out({ ok: true, app: bumpCache(pos[0]) });
+  else out({ ok: false, error: `unknown cache subcommand: ${sub}`, usage });
+  process.exit(0);
+}
+
+if (cmd === 'flow') {
+  const sub = pos.shift();
+  if (sub === 'save') out(saveFlow(JSON.parse(fs.readFileSync(pos[0], 'utf8')), { version: flags.version ? Number(flags.version) : undefined }));
+  else if (sub === 'list') out({ ok: true, flows: listFlows() });
+  else if (sub === 'show') { const f = getFlow(pos[0]); out(f ? { ok: true, flow: f } : { ok: false, error: 'flow not found' }); }
+  else if (sub === 'search') out({ ok: true, flows: searchFlows(pos.join(' ')) });
+  else out({ ok: false, error: `unknown flow subcommand: ${sub}`, usage });
+  process.exit(0);
+}
+
+if (cmd === 'run') {
+  const sub = pos.shift();
+  if (sub === 'start') out(await startRun(pos[0], { note: flags.context || '' }));
+  else if (sub === 'wait') out(await recordAnswer(pos[0], Number(flags.timeout || 600000)));
+  else if (sub === 'advance') {
+    const arts = flags.artifact ? JSON.parse(fs.readFileSync(flags.artifact, 'utf8')) : {};
+    out(await advanceRun(pos[0], arts));
+  }
+  else if (sub === 'status') { const r = getRun(pos[0]); out(r ? { ok: true, run: r } : { ok: false, error: 'run not found' }); }
+  else if (sub === 'put') { putArtifact(pos[0], flags.name, JSON.parse(flags.value || 'null'), { step: flags.step || null }); out({ ok: true }); }
+  else if (sub === 'artifacts') out({ ok: true, artifacts: searchArtifacts(pos[0] || '') });
+  else out({ ok: false, error: `unknown run subcommand: ${sub}`, usage });
+  process.exit(0);
+}
+if (!(await serve())) { out({ ok: false, error: 'askd did not start' }); process.exit(1); }
+
+if (cmd === 'serve') { out({ ok: true, port: PORT }); }
+else if (cmd === 'stop') {
+  let pid = null; try { pid = Number(fs.readFileSync(path.join(DATA, 'askd.pid'), 'utf8').trim()); } catch {}
+  if (pid) { try { process.kill(pid, 'SIGTERM'); } catch {} }
+  await sleep(350); out({ ok: !(await health()), stopped: pid });
+} else if (cmd === 'status') {
+  out(await (await fetch(`${BASE}/health`)).json());
+} else if (cmd === 'new') {
+  const file = pos[0];
+  const raw = fs.readFileSync(file, 'utf8');
+  const isHtml = flags.html || /\.html?$/i.test(file);
+  const spec = isHtml ? null : JSON.parse(raw);
+  const r = await api('POST', '/api/session', {
+    ...(isHtml ? { html: raw } : { spec }),
+    answerSchema: spec?.answerSchema || null,
+    taskBrief: flags.brief || spec?.taskBrief || '',
+    contextRefs: flags.context ? String(flags.context).split(',') : (spec?.contextRefs || []),
+    tools: flags.tools ? String(flags.tools).split(',') : (spec?.tools || []),
+  });
+  out(r.body);
+} else if (cmd === 'wait') {
+  const id = pos[0];
+  const s = session(id);
+  const total = Number(flags.timeout || 600000);
+  const end = Date.now() + total;
+  let result = { ok: false, pending: true, id };
+  while (Date.now() < end) {
+    const chunk = Math.min(60000, end - Date.now());
+    const r = await api('GET', `/api/wait/${id}?timeout=${chunk}`, null, s.adminKey);
+    if (r.status === 204) continue;
+    result = r.body;
+    break;
+  }
+  out(result);
+} else if (cmd === 'push') {
+  const id = pos[0], file = pos[1];
+  const s = session(id);
+  const raw = fs.readFileSync(file, 'utf8');
+  const isHtml = flags.html || /\.html?$/i.test(file);
+  const body = isHtml ? { html: raw } : { spec: JSON.parse(raw) };
+  if (flags['if-version']) body.ifVersion = Number(flags['if-version']);
+  if (flags.final === 'false') body.final = false;
+  out((await api('POST', `/api/push/${id}`, body, s.adminKey)).body);
+} else if (cmd === 'progress') {
+  const id = pos[0];
+  const s = session(id);
+  out((await api('POST', `/api/progress/${id}`, {
+    step: flags.step || '', detail: flags.detail || '', pct: flags.pct != null ? Number(flags.pct) : null, tone: flags.tone || 'dim',
+  }, s.adminKey)).body);
+} else if (cmd === 'state') {
+  out(await (await fetch(`${BASE}/api/state/${pos[0]}`)).json());
+} else if (cmd === 'events') {
+  const id = pos[0], s = session(id);
+  out((await api('GET', `/api/events/${id}`, null, s.adminKey)).body);
+} else if (cmd === 'cancel') {
+  const id = pos[0], s = session(id);
+  out((await api('POST', `/api/cancel/${id}`, {}, s.adminKey)).body);
+} else if (cmd === 'rm') {
+  const id = pos[0], s = session(id);
+  out((await api('DELETE', `/api/session/${id}`, null, s.adminKey)).body);
+} else if (cmd === 'list') {
+  out(await (await fetch(`${BASE}/api/sessions`)).json());
+} else out({ ok: false, error: `unknown: ${cmd}`, usage });

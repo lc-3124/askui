@@ -1,0 +1,19 @@
+{
+  "kicker": "CONFIRM",
+  "title": "确认执行",
+  "subtitle": "这一步会产生实际影响，请确认细节。",
+  "blocks": [
+    { "type": "list", "items": [
+      { "title": "目标", "desc": "example.com 的生产环境", "tag": "prod" },
+      { "title": "动作", "desc": "重启服务并清空缓存", "tag": "restart" }
+    ]},
+    { "type": "confirm", "name": "agree", "label": "我知道会短暂中断服务" }
+  ],
+  "answerSchema": {
+    "type": "object",
+    "required": ["agree"],
+    "additionalProperties": false,
+    "properties": { "agree": { "type": "boolean", "const": true } }
+  },
+  "submit": { "label": "确认执行" }
+}
