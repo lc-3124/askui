@@ -18,8 +18,12 @@ export function validateFlow(flow) {
     if (!s.key) errors.push('step missing key');
     if (keys.has(s.key)) errors.push(`duplicate step key: ${s.key}`);
     keys.add(s.key);
-    if (!['input', 'compute', 'final'].includes(s.kind || 'input')) errors.push(`step ${s.key}: kind must be input|compute|final`);
+    if (!['input', 'compute', 'final', 'deliver'].includes(s.kind || 'input')) errors.push(`step ${s.key}: kind must be input|compute|final|deliver`);
     if (['input', 'final'].includes(s.kind || 'input') && !s.ui && !s.interface) errors.push(`step ${s.key}: UI step needs ui or interface`);
+  }
+  if (flow.strict !== false) {
+    const last = (flow.steps || [])[(flow.steps || []).length - 1];
+    if (!last || last.kind !== 'deliver') errors.push('strict flow must end with a deliver step');
   }
   for (const s of flow.steps || []) {
     const n = s.next;
@@ -153,6 +157,18 @@ export async function startStep(run, flow, step) {
   const t = now();
   const brief = `${flow.goal}${step.goal ? ' / ' + step.goal : ''}`;
   let session = null;
+  if (step.kind === 'deliver') {
+    const last = db.prepare('SELECT session_id FROM step_runs WHERE run_id=? AND session_id IS NOT NULL ORDER BY started_at DESC LIMIT 1').get(run.id);
+    if (!last?.session_id) throw new Error('deliver step has no session to verify');
+    const key = sessionKey(last.session_id);
+    const st = key ? await fetch(`${ASK}/api/state/${last.session_id}`).then((r) => r.json()).catch(() => null) : null;
+    if (!st?.delivered) throw new Error('deliver gate: page not delivered (use askui deliver before advancing)');
+    db.prepare('INSERT INTO step_runs(id,run_id,step_key,session_id,status,started_at,ended_at) VALUES(?,?,?,?,?,?,?)')
+      .run(uid(6), run.id, step.key, last.session_id, 'done', t, t);
+    db.prepare('UPDATE runs SET status=?,current_step=?,updated_at=? WHERE id=?').run('done', step.key, t, run.id);
+    log(run.id, 'delivered', { step: step.key, session: last.session_id });
+    return { run: getRun(run.id), session: null };
+  }
   if (step.kind === 'final') {
     session = await createSession({ spec: resolveSpec(step), schema: step.output, brief, flow });
     db.prepare('INSERT INTO step_runs(id,run_id,step_key,session_id,status,started_at,ended_at) VALUES(?,?,?,?,?,?,?)')
@@ -250,6 +266,17 @@ export async function advanceRun(runId, artifactValues = {}) {
   const step = flow.steps.find((s) => s.key === cur);
   const nextKey = step ? step.next : flow.steps[0].key;
   if (!nextKey) {
+    // Delivery gate: a run cannot complete until the last page is a delivered final page.
+    const last = db.prepare('SELECT session_id FROM step_runs WHERE run_id=? AND session_id IS NOT NULL ORDER BY started_at DESC LIMIT 1').get(runId);
+    if (last?.session_id) {
+      const key = sessionKey(last.session_id);
+      if (key) {
+        const st = await fetch(`http://127.0.0.1:${process.env.ASKUI_PORT || 9410}/api/state/${last.session_id}`).then((r) => r.json()).catch(() => null);
+        if (st && !st.delivered) {
+          throw new Error('delivery required: push a final page (askui deliver) before completing the run');
+        }
+      }
+    }
     db.prepare('UPDATE runs SET status=?,updated_at=? WHERE id=?').run('done', now(), runId);
     log(runId, 'run_done');
     return { run: getRun(runId), session: null };

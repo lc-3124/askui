@@ -49,6 +49,35 @@ askui run wait <run.id>
 7. **调研不抢焦点**。查资料一律 `zbr new --background <url>`，之后用 `--tab-id` 读取；不要激活标签、不要切换用户正在看的页面。交付前关掉调研页。
 8. **任何时刻只有一个 AI 页面**。开新页必须用 `askui page open <url>`：引擎会先关掉所有旧 askui 页、资料收集页和登记过的标签，再打开新页。不要直接用 `zbr new` 开 askui 页面。
 
+## 模型输出：网关直通（不靠 AI）
+
+```bash
+askui gateway <session> --upstream="https://api.deepseek.com/v1"
+# 输出 baseUrl: http://127.0.0.1:9420/s/<session>/v1
+```
+
+把 AI 客户端的 `base_url` 指到网关。网关转发请求的同时，把 SSE 的
+`reasoning_content` / `content` / `tool_calls` **原样**写进 `/api/stream`，
+页面固定解析器实时渲染。
+
+- 不需要 AI 写思考、也不需要 AI 主动上报
+- `askui gateway-stop` 关闭
+- 不支持 SSE 的客户端会退化为整段输出，但仍会进流
+
+如果客户端不方便改 base_url，可以用 `engine/tap.mjs` 单次调用，或自己往
+`/api/stream/<session>` POST 原始 chunk。
+
+## 强制流程控制
+
+流程不是建议，是状态机：
+
+1. **strict flow 必须以 `deliver` 步骤结束**，否则 `flow save` 直接拒绝。
+2. `deliver` 步骤会检查最后那个会话的 `delivered` 标志；没有交付就报错，run 不能结束。
+3. `askui deliver <session> <spec|html>` 是唯一推荐的终态交付方式：校验终态页 + 标记 delivered。
+4. `run advance` 到终态时同样检查 delivered，缺了就抛 `delivery required`。
+5. 答案提交后 5 分钟没有交付，引擎把会话标成 `stalled`，页面显示「AI 处理超时」。
+6. 页面唯一性由 `askui page open` 强制：开新页先关所有旧 AI 页。
+
 ## 过程播报：边做边说
 
 不是等做完再写总结。AI 在做事的过程中，**一有念头就发一条**，页面通过 SSE 实时滚动。
@@ -306,6 +335,17 @@ worker 是真实子进程，不是 prompt；换成你的 AI CLI 即可。默认 
 - 不需要回聊天，也不需要用户再发一句「继续」。
 
 引擎侧命令可通过 `ASKUI_NEXT_CMD` 换成别的流程（默认 `askui run start immersive-intake`）。
+
+## 交付闸门与看门狗
+
+交付不是 AI 的自由动作，是引擎状态：
+
+- **最终页必须用 `askui deliver <session> <spec|html>`**，它会校验终态页（无输入控件）并标记 `delivered`；
+- 中间态用 `askui push` + `final:false`；
+- `askui run advance` 到终态时，引擎检查 `delivered`，没有就报错，不允许“任务完成但页面没交付”；
+- 答案提交后 5 分钟仍未交付，引擎把会话标记为 `stalled`，页面显示「AI 处理超时」，不会假装还在处理。
+
+所以流程是：`wait → 处理 → delay → deliver → advance`。任何一步都不能跳过交付。
 
 ## 数据交接约定
 

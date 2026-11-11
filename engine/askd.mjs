@@ -60,7 +60,7 @@ function logEvent(s, type, data = {}) {
 function publicState(s, since = 0) {
   return {
     ok: true, id: s.id, state: s.state, version: s.version,
-    progress: s.progress, thoughts: s.thoughts || [], stream: (s.stream || []).filter((e) => e.seq > since), seq: s.seq || 0, reports: s.reports || [], reportSeq: s.reportSeq || 0, answered: !!s.answer, createdAt: s.createdAt,
+    progress: s.progress, thoughts: s.thoughts || [], stream: (s.stream || []).filter((e) => e.seq > since), seq: s.seq || 0, reports: s.reports || [], reportSeq: s.reportSeq || 0, answered: !!s.answer, delivered: !!s.delivered, answeredAt: s.answeredAt || null, createdAt: s.createdAt,
     interactive: s.spec ? isInteractiveSpec(s.spec) : false, final: s.state === 'done',
   };
 }
@@ -82,7 +82,7 @@ const server = http.createServer(async (req, res) => {
         id, token, adminKey, createdAt: Date.now(), touchedAt: Date.now(),
         state: body.spec && body.spec.final ? 'done' : 'waiting', taskBrief: body.taskBrief || '', contextRefs: body.contextRefs || [],
         tools: body.tools || [], spec: body.spec || null, answerSchema: body.answerSchema || null,
-        html: '', version: 1, answer: null, answerKey: null, progress: [], thoughts: [], stream: [], seq: 0, reports: [], reportSeq: 0, events: [],
+        html: '', version: 1, answer: null, answerKey: null, delivered: false, answeredAt: null, progress: [], thoughts: [], stream: [], seq: 0, reports: [], reportSeq: 0, events: [],
       };
       s.html = body.html
         ? String(body.html).replaceAll('__SESSION__', id).replaceAll('__TOKEN__', token)
@@ -133,6 +133,7 @@ const server = http.createServer(async (req, res) => {
       s.answer = body.values;
       s.answerKey = body.idempotencyKey || rid(8);
       s.state = 'answered';
+      s.answeredAt = Date.now();
       s.progress = s.progress || [];
       s.progress.push({ at: Date.now(), step: 'AI 已接手', detail: '正在解析你的输入', tone: 'ok' });
       logEvent(s, 'answered', { keys: body.values && typeof body.values === 'object' ? Object.keys(body.values) : [] });
@@ -178,6 +179,7 @@ const server = http.createServer(async (req, res) => {
       s.html = body.html || renderPage(body.spec, { sessionId: s.id, token: s.token, version: s.version + 1 });
       s.version += 1;
       s.state = body.final === false ? 'generating' : 'done';
+      if (body.final !== false) s.delivered = true;
       if (body.spec) s.spec = body.spec;
       logEvent(s, 'pushed', { version: s.version, final: body.final !== false });
       save(s);
@@ -355,6 +357,27 @@ const server = http.createServer(async (req, res) => {
     return json(res, 500, { ok: false, error: String(e.message || e) });
   }
 });
+
+/* Delivery watchdog: answered but never delivered -> surface as stalled. */
+setInterval(() => {
+  const limit = Number(process.env.ASKUI_STALL_MS || 5 * 60 * 1000);
+  const now = Date.now();
+  for (const f of fs.readdirSync(STORE)) {
+    if (!f.endsWith('.json')) continue;
+    const p = path.join(STORE, f);
+    try {
+      const s = JSON.parse(fs.readFileSync(p, 'utf8'));
+      if (!s.answeredAt || s.delivered || ['done', 'cancelled', 'expired', 'stalled'].includes(s.state)) continue;
+      if (now - s.answeredAt > limit) {
+        s.state = 'stalled';
+        s.progress = s.progress || [];
+        s.progress.push({ at: now, step: 'AI 处理超时', detail: '页面仍未交付', tone: 'warn' });
+        logEvent(s, 'stalled', { answeredAt: s.answeredAt });
+        save(s);
+      }
+    } catch {}
+  }
+}, 15000).unref();
 
 /* TTL: mark idle sessions expired, delete files after KEEP. */
 setInterval(() => {

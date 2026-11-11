@@ -92,6 +92,47 @@
   const fmtElapsed = (ms) => { const s = Math.floor(ms / 1000); return s < 60 ? `${s}s` : `${Math.floor(s / 60)}m${String(s % 60).padStart(2, '0')}s`; };
   const esc = (x) => String(x ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
+  const streamEl = $('#askui-stream');
+  const paneStream = $('#pane-stream');
+  const paneActions = $('#pane-actions');
+  let lastStreamSeq = 0;
+  let hasStream = false;
+  const codeOpen = { reasoning: false, content: false };
+
+  function switchPane(name) {
+    document.querySelectorAll('.act-tab').forEach((b) => b.classList.toggle('on', b.dataset.pane === name));
+    if (paneStream) paneStream.hidden = name !== 'stream';
+    if (paneActions) paneActions.hidden = name !== 'actions';
+  }
+  document.querySelectorAll('.act-tab').forEach((b) => b.addEventListener('click', () => switchPane(b.dataset.pane)));
+
+  function renderStreamEntry(e) {
+    if (!streamEl || e.seq <= lastStreamSeq) return;
+    lastStreamSeq = e.seq;
+    if (!hasStream) { hasStream = true; switchPane('stream'); }
+    const channel = e.channel || 'content';
+    const t = String(e.text || '');
+    let html = '';
+    if (/^```/.test(t.trim())) {
+      codeOpen[channel] = !codeOpen[channel];
+      html = `<div class="md-code">${esc(t.trim())}</div>`;
+    } else if (codeOpen[channel]) {
+      html = `<div class="md-code-line">${esc(t)}</div>`;
+    } else {
+      const h = t.match(/^(#{1,4})\s+(.*)$/);
+      const li = t.match(/^\s*([-*]|\d+\.)\s+(.*)$/);
+      if (h) html = `<div class="md-h">${esc(h[2])}</div>`;
+      else if (li) html = `<div class="md-li"><span>${esc(li[1])}</span>${esc(li[2])}</div>`;
+      else if (!t.trim()) html = '<div class="md-gap"></div>';
+      else html = `<div class="md-p">${esc(t)}</div>`;
+    }
+    const row = document.createElement('div');
+    row.className = 'stream-line ch-' + channel;
+    row.innerHTML = channel === 'tool' ? `<span class="tool-tag">tool</span>${esc(t)}` : html;
+    streamEl.appendChild(row);
+    streamEl.scrollTop = streamEl.scrollHeight;
+  }
+
   function makeRow(r) {
     const row = document.createElement('div');
     row.className = 'act' + (r.phase === 'note' ? ' is-note' : r.phase === 'before' ? ' is-pending' : ' is-done') + (r.status === 'error' ? ' is-error' : '');
@@ -167,6 +208,7 @@
     try {
       const es = new EventSource(`/api/live/${SID}`);
       es.addEventListener('report', (e) => { try { renderReport(JSON.parse(e.data)); } catch {} });
+      es.addEventListener('stream', (e) => { try { renderStreamEntry(JSON.parse(e.data)); } catch {} });
       es.addEventListener('version', (e) => {
         try {
           const d = JSON.parse(e.data);
@@ -174,6 +216,13 @@
         } catch {}
       });
       es.onerror = () => { /* EventSource auto-reconnects */ };
+      setInterval(async () => {
+        try {
+          const st = await (await fetch(`/api/state/${SID}`)).json();
+          if (st.state === 'stalled' && titleEl) titleEl.textContent = 'AI 处理超时，仍在等待…';
+          if (st.version > BASE_VERSION) location.reload();
+        } catch {}
+      }, 2000);
     } catch (e) { pollFallback(); }
   }
 

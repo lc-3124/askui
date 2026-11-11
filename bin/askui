@@ -99,6 +99,41 @@ if (cmd === 'platform') {
   process.exit(0);
 }
 
+if (cmd === 'gateway') {
+  const id = pos[0];
+  const s = session(id);
+  const gport = Number(flags.port || 9420);
+  const up = flags.upstream || process.env.ASKUI_UPSTREAM || 'https://api.deepseek.com/v1';
+  const log = fs.openSync(path.join(HOME, '.local/share/askui/runs', `gateway-${gport}.log`), 'a');
+  const child = spawn(process.execPath, [path.join(ROOT, 'engine/gateway.mjs'), `--session=${id}`, `--port=${gport}`, `--upstream=${up}`], {
+    detached: true, stdio: ['ignore', log, log], env: process.env,
+  });
+  child.unref();
+  out({ ok: true, pid: child.pid, baseUrl: `http://127.0.0.1:${gport}/s/${id}/v1`, upstream: up });
+  process.exit(0);
+}
+
+if (cmd === 'gateway-stop') {
+  const gport = Number(flags.port || 9420);
+  let pid = null;
+  try { pid = Number(fs.readFileSync(path.join(HOME, '.local/share/askui/runs', `gateway-${gport}.pid`), 'utf8')); } catch {}
+  if (pid) { try { process.kill(pid, 'SIGTERM'); } catch {} }
+  out({ ok: true, stopped: pid });
+  process.exit(0);
+}
+
+if (cmd === 'deliver') {
+  const id = pos[0], file = pos[1];
+  const s = session(id);
+  const raw = fs.readFileSync(file, 'utf8');
+  const isHtml = flags.html || /\.html?$/i.test(file);
+  const body = isHtml ? { html: raw, final: true } : { spec: JSON.parse(raw), final: true };
+  const pushed = await api('POST', `/api/push/${id}`, body, s.adminKey);
+  const st = await api('GET', `/api/state/${id}`, null, s.adminKey);
+  out({ ok: !!pushed.body.ok && !!st.body.delivered, push: pushed.body, state: st.body });
+  process.exit(0);
+}
+
 if (cmd === 'page') {
   const sub = pos.shift();
   if (sub === 'open') out(openPage(pos[0]));

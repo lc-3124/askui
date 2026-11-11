@@ -155,11 +155,16 @@ ${interactive ? `<div class="submitbar"><div class="in"><div class="t">${esc(not
     <span class="pulse"></span>
     <div>
       <div class="act-title" id="askui-title">已提交，AI 正在接手…</div>
-      <div class="act-sub">操作日志 · 实时推送 · <span id="askui-elapsed">0s</span></div>
+      <div class="act-sub">模型原始输出由网关直通 · <span id="askui-elapsed">0s</span></div>
+    </div>
+    <div class="act-tabs">
+      <button class="act-tab" data-pane="stream">模型输出</button>
+      <button class="act-tab on" data-pane="actions">行动</button>
     </div>
   </div>
-  <div class="act-list" id="askui-actions"></div>
-  <div class="act-foot" id="askui-hint">AI 在任何操作前都会先向 JS 服务报告，页面通过 SSE 实时渲染。</div>
+  <div class="act-pane" id="pane-stream" hidden><div class="stream-list" id="askui-stream"></div></div>
+  <div class="act-pane" id="pane-actions"><div class="act-list" id="askui-actions"></div></div>
+  <div class="act-foot">模型输出由本地网关抓取，网页固定解析；行动日志由引擎记录。</div>
 </div></div>
 <div class="toast" id="askui-toast"></div>
 <script>${client}</script>
